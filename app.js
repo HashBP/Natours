@@ -1,8 +1,11 @@
 /* eslint-disable prettier/prettier */
-const express = require('express');
 
+// Our Express app
+const express = require('express');
 const app = express();
 const morgan = require('morgan');
+const appError = require('./dev-data/utils/appError');
+const globalErrorHandler = require('./dev-data/controller/errorController.js');
 
 const tourRouter = require('./dev-data/routes/tourRouts');
 const userRouter = require('./dev-data/routes/userRouts');
@@ -18,5 +21,15 @@ app.use(express.json());
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/tours', tourRouter);
+
+app.all('*', (req, res, next) => {
+  // const err = new Error(`Can't find ${req.originalUrl} on this server!!`);
+  // err.status = 'Fail';
+  // err.statusCode = 404;
+
+  next(new appError(`Can't find ${req.originalUrl} on this server!!`, 404));
+});
+
+app.use(globalErrorHandler);
 
 module.exports = app;

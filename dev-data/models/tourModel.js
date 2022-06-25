@@ -3,6 +3,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator=require('validator');
+const catchAsync=require('./../utils/catchAsync')
 
 const tourSchema = new mongoose.Schema(
   {

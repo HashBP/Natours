@@ -13,9 +13,12 @@ router.use('/:tourId/reviews', reviewRouter);
 router
   .route('/top-5-tours')
   .get(fileController.aliasTopTours, fileController.getAllTours);
-  
+
 router.route('/tour-stats').get(fileController.getTourStats);
 
+router.route('/tours-within/:distance/center/:latlng/unit/:unit').get(fileController.getTourWithin);
+
+router.route('/distances/:latlng/unit/:unit').get(fileController.getDistances);
 router
   .route('/')
   .get(fileController.getAllTours)

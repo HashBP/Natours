@@ -6,21 +6,22 @@ const userController = require('../controller/userController');
 
 const router = express.Router();
 
-router.patch(
-  '/updateMyPassword',
-  authController.protect,
-  authController.updateMyPassword
-);
-router.patch('/updateMe', authController.protect, userController.updateMe);
-router.delete('/deleteMe', authController.protect, userController.deleteMe);
-
 router.post('/signup', authController.signup);
 router.post('/login', authController.login);
-router.get('/users', fileController.getAllUsers);
-router.get('/users', fileController.getAllUsers);
-
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
+
+router.use(authController.protect);
+
+router.get('/me', userController.getMe, userController.getAUser);
+
+router.patch('/updateMyPassword', authController.updateMyPassword);
+router.patch('/updateMe', userController.updateMe);
+router.delete('/deleteMe', userController.deleteMe);
+router.get('/users', fileController.getAllUsers);
+
+router.use(authController.restrictTo('admin'));
+
 router
   .route('/')
   .get(fileController.getAllUsers)
@@ -28,6 +29,7 @@ router
 router
   .route('/:id')
   .get(fileController.getAUser)
-  .patch(fileController.patchUser);
+  .patch(fileController.patchUser)
+  .delete(userController.deleteUser);
 
 module.exports = router;

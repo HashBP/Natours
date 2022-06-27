@@ -8,12 +8,13 @@ const morgan = require('morgan');
 const appError = require('./dev-data/utils/appError');
 const hpp = require('hpp');
 const mongoSanitize = require('express-mongo-sanitize');
-const xss = requre('xss-clean');
+const xss = require('xss-clean');
 const helmet = require('helmet');
 const globalErrorHandler = require('./dev-data/controller/errorController.js');
 
 const tourRouter = require('./dev-data/routes/tourRouts');
 const userRouter = require('./dev-data/routes/userRouts');
+const reviewRouter = require('./dev-data/routes/reviewRouts');
 
 // 1) Global Middlewere
 // Set security HTTP
@@ -67,6 +68,7 @@ app.use(
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all('*', (req, res, next) => {
   // const err = new Error(`Can't find ${req.originalUrl} on this server!!`);

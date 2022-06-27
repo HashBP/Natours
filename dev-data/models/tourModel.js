@@ -2,8 +2,9 @@
 
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const validator=require('validator');
-const catchAsync=require('./../utils/catchAsync')
+const validator = require('validator');
+const catchAsync = require('./../utils/catchAsync');
+const User = require('./userModel');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -12,8 +13,8 @@ const tourSchema = new mongoose.Schema(
       unique: true,
       required: [true, 'A tour name should be present'],
       trim: true,
-      maxlength : [40,'A tour name must be smallen then 40'],
-      minlength : [10,'A tour name must be greater then 10'],
+      maxlength: [40, 'A tour name must be smallen then 40'],
+      minlength: [10, 'A tour name must be greater then 10']
       // validate:[validator.isAlpha,'Tour name must only contains characters.']
     },
     slug: String,
@@ -28,16 +29,16 @@ const tourSchema = new mongoose.Schema(
     difficulty: {
       type: String,
       required: [true, 'A tour must have a difficulty'],
-      enum:{
-        values : ['easy','medium','difficult'],
-        message :'Difficulty must be easy, medium or difficult'
+      enum: {
+        values: ['easy', 'medium', 'difficult'],
+        message: 'Difficulty must be easy, medium or difficult'
       }
     },
     ratingAverag: {
       type: Number,
       default: 4.8,
-      min:[1,'Rating must be above 1'],
-      max:[5,'Rating must be less then 5']
+      min: [1, 'Rating must be above 1'],
+      max: [5, 'Rating must be less then 5']
     },
     ratingQuantity: {
       type: Number,
@@ -49,8 +50,8 @@ const tourSchema = new mongoose.Schema(
     },
     priceDiscount: {
       type: Number,
-      validate : function(val){
-        return val<this.price;
+      validate: function(val) {
+        return val < this.price;
       },
       message: 'Discount price ({VALUE}) should be below regular price'
     },
@@ -76,7 +77,37 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
-    startDates: [Date]
+    startDates: [Date],
+    startLocation: {
+      //GeoJSON
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point']
+      },
+      coordinates: [Number],
+      address: String,
+      description: String
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point']
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number
+      }
+    ],
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User'
+      }
+    ]
   }
   // {
   //   toJSON: { virtuals: true },
@@ -87,7 +118,19 @@ const tourSchema = new mongoose.Schema(
 //   return this.duration / 7;
 // });
 
+// Virtual Populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id'
+});
+
 //Document Middleware : runs before .save() and .create()
+// tourSchema.pre('save',async function(next) {
+//   const guidePromises=this.guides.map(async id=>await User.findById(id));
+//   this.guides=await Promise.all(guidePromises);
+//   next();
+// });
 
 // tourSchema.pre('save', function(next) {
 //   this.slug = slugify(this.name, {
@@ -101,16 +144,25 @@ const tourSchema = new mongoose.Schema(
 // });
 
 // Query Middleware
+
 tourSchema.pre(/^find/, function(next) {
   this.find({ secretTour: { $ne: true } });
   this.start = Date.now();
   next();
 });
+
+tourSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt'
+  });
+  next();
+});
+
 tourSchema.post(/^find/, function(doc, next) {
   console.log(`Query took ${Date.now() - this.start} miliseconds.`);
   next();
 });
-
 
 const Tour = mongoose.model('Tour', tourSchema);
 module.exports = Tour;

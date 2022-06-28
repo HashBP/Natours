@@ -2,10 +2,10 @@
 
 // Our Express app
 const express = require('express');
-const app = express();
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
 const appError = require('./dev-data/utils/appError');
+const path = require('path');
 const hpp = require('hpp');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
@@ -16,7 +16,13 @@ const tourRouter = require('./dev-data/routes/tourRouts');
 const userRouter = require('./dev-data/routes/userRouts');
 const reviewRouter = require('./dev-data/routes/reviewRouts');
 
+const app = express();
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, './dev-data/views'));
+
 // 1) Global Middlewere
+
 // Set security HTTP
 app.use(helmet());
 
@@ -34,7 +40,7 @@ const limiter = rateLimit({
   max: 100,
   windowsMs: 60 * 60 * 1000,
   nessage:
-    'Too meany requests from this IP, Please wait for a hour before making another request.'
+    'Too meany requests from this IP, Please wait for a hour before making another request.',
 });
 app.use('/api', limiter);
 
@@ -59,12 +65,17 @@ app.use(
       'ratingAverage',
       'maxGroupSize',
       'difficulty',
-      'price'
-    ]
+      'price',
+    ],
   })
 );
 
 // 2)Routes
+app.get('/', (req, res) => {
+  res.status(200).render('base',{
+    
+  });
+});
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/tours', tourRouter);

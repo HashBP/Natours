@@ -4,9 +4,9 @@ dotenv.config({ path: './config.env' });
 //Mongoose server handeling
 const mongoose = require('mongoose');
 const fs = require('fs');
-const Tour = require('../models/tourModel');
-const Review = require('../models/reviewModel');
-const User = require('../models/userModel');
+const Tour = require('../../models/tourModel');
+// const Review = require('../../models/reviewModel');
+// const User = require('../../models/userModel');
 
 const DB = process.env.DATABASE.replace(
   '<PASSWORD>',
@@ -35,8 +35,8 @@ const reviews = JSON.parse(
 const importData = async () => {
   try {
     await Tour.create(tours);
-    await User.create(users,{validateBeforeSave:false});
-    await Review.create(reviews);
+    // await User.create(users,{validateBeforeSave:false});
+    // await Review.create(reviews);
     console.log('Data added successfully');
   } catch (err) {
     console.log(err);
@@ -46,8 +46,8 @@ const importData = async () => {
 const deleteData = async () => {
   try {
     await Tour.deleteMany();
-    await User.deleteMany();
-    await Review.deleteMany();
+    // await User.deleteMany();
+    // await Review.deleteMany();
     console.log('Data deleted successfully');
   } catch (err) {
     console.log(err);
